@@ -1,270 +1,196 @@
-📘 DOCUMENTATION COMPLÈTE – PROJET SQL SPOTIFY
-🧩 1. OBJECTIF GLOBAL DU PROJET
+Parfait 👍
+Voici un **README.md complet, clair et professionnel**, exactement au niveau attendu pour un **portfolio Data Analyst / SQL**, rédigé en **français** et aligné avec tout le travail que tu as réalisé.
 
-Ce projet vise à :
+Tu peux le **copier-coller directement dans GitHub**.
 
-Importer un dataset brut (cleaned_dataset)
+---
 
-Le sécuriser via une table de staging
+# 🎵 Spotify – Analyse de données avec SQL Server
 
-Nettoyer et typer correctement les données
+## 📌 Description du projet
 
-Vérifier la qualité des données (NULLs, doublons, cohérence)
+Ce projet présente une **analyse de données Spotify de bout en bout** en utilisant **Microsoft SQL Server**.
+L’objectif est de démontrer un **pipeline ETL complet**, depuis l’importation des données brutes jusqu’à l’exploration, le nettoyage, le contrôle qualité et l’analyse analytique via des requêtes SQL avancées.
 
-Réaliser des analyses SQL progressives (des plus simples aux plus avancées)
+Le projet met en avant des **bonnes pratiques professionnelles** utilisées en Data Analytics et Data Engineering.
 
-🔁 PARTIE 1 — PIPELINE D’IMPORT (ETL)
-🔹 1️⃣ Création de la base de données
-CREATE DATABASE spotify_db;
+---
 
+## 🎯 Objectifs
 
-Objectif :
-Créer un espace dédié au projet pour isoler les données Spotify.
+* Importer un dataset Spotify dans SQL Server
+* Gérer les erreurs d’importation via une **table de staging**
+* Nettoyer et convertir les données (types, NULL, booléens)
+* Vérifier la qualité des données (valeurs manquantes, doublons, cohérence)
+* Réaliser des analyses exploratoires et analytiques
+* Répondre à des questions métier à l’aide de requêtes SQL
 
-Bonne pratique :
-Toujours séparer les projets dans des bases différentes.
+---
 
-🔹 2️⃣ Sélection de la base
-USE spotify_db;
+## 🗂️ Architecture du projet
 
+```
+spotify-sql-data-analysis/
+│
+├── data/
+│   └── cleaned_dataset.csv
+│
+├── sql/
+│   ├── 01_create_database.sql
+│   ├── 02_staging_table.sql
+│   ├── 03_final_table.sql
+│   ├── 04_data_quality_checks.sql
+│   ├── 05_exploratory_analysis.sql
+│   └── 06_analytical_queries.sql
+│
+└── README.md
+```
 
-Objectif :
-Indiquer à SQL Server que toutes les opérations suivantes concernent spotify_db.
+---
 
-🔹 3️⃣ Création de la table de staging (staging_spotify)
-CREATE TABLE dbo.staging_spotify (...)
+## 🔄 Pipeline de données (ETL)
 
+### 1️⃣ Source des données
 
-Objectif :
+* Dataset Spotify nettoyé (`cleaned_dataset`)
+* Contient des informations sur :
 
-Accueillir les données brutes
+  * artistes, albums, titres
+  * caractéristiques audio (energy, danceability, loudness…)
+  * statistiques d’engagement (streams, views, likes, comments)
+  * plateformes de diffusion (Spotify, YouTube)
 
-Autoriser les NULL
+---
 
-Éviter les erreurs d’import
-
-Pourquoi staging ?
-
-Les données réelles sont rarement propres dès l’import.
-
-📌 Règle pro :
-
-Jamais de transformation directe depuis le dataset source vers la table finale.
-
-🔹 4️⃣ Vérification des valeurs non NULL dans la source
-SELECT COUNT(*), COUNT(energy), COUNT(loudness), COUNT(valence)
-FROM dbo.cleaned_dataset;
-
-
-Objectif :
-
-Mesurer la qualité du dataset
-
-Vérifier si certaines colonnes sont partiellement remplies
-
-👉 COUNT(colonne) ignore les NULL
-
-🔹 5️⃣ Vérification de l’existence de la table source
-SELECT *
-FROM INFORMATION_SCHEMA.TABLES
-WHERE TABLE_NAME = 'cleaned_dataset';
-
-
-Objectif :
-S’assurer que la table source existe avant toute manipulation.
-
-🔹 6️⃣ Nettoyage de la table staging
-TRUNCATE TABLE dbo.staging_spotify;
-
+### 2️⃣ Table de staging (`staging_spotify`)
 
 Objectif :
 
-Éviter les doublons
+* Accepter **toutes les données brutes**
+* Autoriser les valeurs `NULL`
+* Éviter les erreurs d’importation
 
-Garantir un import propre
+Caractéristiques :
 
-📌 TRUNCATE est plus rapide que DELETE.
+* Types souples (`FLOAT`, `NVARCHAR`)
+* Booléens stockés en texte (`"true" / "false"`)
 
-🔹 7️⃣ Chargement des données dans staging
-INSERT INTO dbo.staging_spotify
-SELECT *
-FROM dbo.cleaned_dataset;
+---
 
-
-Objectif :
-Copier les données sans transformation.
-
-🔹 8️⃣ Création de la table finale (spotify)
-CREATE TABLE dbo.spotify (...)
-
+### 3️⃣ Table finale (`spotify`)
 
 Objectif :
 
-Appliquer les bons types de données
+* Stocker des données propres et prêtes à l’analyse
 
-Convertir les booléens en BIT
+Transformations appliquées :
 
-Préparer la table pour l’analyse
+* Conversion des métriques volumineuses en `BIGINT`
+* Conversion des booléens en `BIT`
+* Gestion sécurisée des valeurs manquantes (`NULL`)
+* Validation des plages de valeurs (ex : energy ∈ [0,1])
 
-📌 Exemple :
+---
 
-views, likes, stream → BIGINT
+## 🧪 Contrôle qualité des données
 
-licensed, official_video → BIT
+Les vérifications suivantes ont été effectuées :
 
-🔹 9️⃣ Transformation et insertion finale
-INSERT INTO dbo.spotify
-SELECT ..., CAST(), CASE WHEN ...
-FROM dbo.staging_spotify;
+* 🔍 Valeurs manquantes par colonne
+* 🔁 Détection des doublons (artist, track, album)
+* 📏 Validation des plages numériques
+* ✅ Vérification des types de données
+* 🔄 Cohérence des plateformes de diffusion
 
+Exemple :
 
-Objectif :
+```sql
+SELECT COUNT(*) - COUNT(energy) AS energy_nulls
+FROM spotify;
+```
 
-Transformer les types
+---
 
-Nettoyer les booléens (true/false → 1/0)
+## 📊 Exploration des données
 
-Charger les données propres
+Analyses exploratoires réalisées :
 
-📌 C’est le cœur de l’ETL.
+* Répartition des types d’albums (album / single)
+* Distribution des valeurs audio (energy, danceability)
+* Répartition des streams par plateforme
+* Analyse des vidéos officielles
+* Comparaison Spotify vs YouTube
 
-🔹 🔟 Vérification du volume de données
-SELECT COUNT(*) FROM dbo.spotify;
+---
 
+## 📈 Analyses analytiques
 
-Objectif :
-Valider que toutes les lignes ont été transférées.
+Quelques questions métier traitées :
 
-🔹 1️⃣1️⃣ Vérification des colonnes booléennes
-SELECT licensed, official_video, COUNT(*)
-FROM dbo.spotify
-GROUP BY licensed, official_video;
+* 🎧 Titres dépassant 1 milliard de streams
+* 👤 Nombre de titres par artiste
+* 💃 Moyenne de la danceability par album
+* ⚡ Top 5 des titres les plus énergiques
+* 🎥 Titres avec vidéos officielles et leurs performances
+* 🥇 Top 3 des titres les plus vus par artiste
+* 📊 Comparaison des streams Spotify vs YouTube
 
+Exemple :
 
-Objectif :
-S’assurer que les valeurs sont bien 0 / 1 / NULL.
+```sql
+SELECT track
+FROM spotify
+GROUP BY track
+HAVING 
+    SUM(CASE WHEN most_played_on = 'Spotify' THEN stream ELSE 0 END)
+  >
+    SUM(CASE WHEN most_played_on = 'Youtube' THEN stream ELSE 0 END);
+```
 
-🔹 1️⃣2️⃣ Vérification des valeurs NULL
-SELECT COUNT(*), COUNT(danceability), COUNT(energy), ...
-FROM dbo.spotify;
+---
 
+## 🛠️ Technologies utilisées
 
-Objectif :
-Comparer total des lignes vs valeurs non NULL.
+* **Microsoft SQL Server**
+* **T-SQL**
+* SQL Server Management Studio (SSMS)
+* CSV Dataset
 
-🔹 1️⃣3️⃣ Nettoyage final de la staging
-TRUNCATE TABLE dbo.staging_spotify;
+---
 
+## 📌 Compétences démontrées
 
-Objectif :
-Préparer la table pour un futur import.
+* SQL avancé (CTE, Window Functions, CASE, HAVING)
+* Data Cleaning & Data Quality
+* ETL avec tables de staging
+* Modélisation de données
+* Analyse exploratoire
+* Analyse métier orientée décision
 
-🔍 PARTIE 2 — DATA QUALITY & EXPLORATION
-🔹 Structure de la table
-EXEC sp_columns spotify;
+---
 
+## 🚀 Améliorations possibles
 
-Objectif :
-Afficher les colonnes, types et tailles.
+* Ajout d’index pour l’optimisation des requêtes
+* Automatisation de l’import (SSIS / SQL Agent)
+* Création de vues analytiques
+* Connexion à Power BI pour la visualisation
+* Gestion des dimensions (Artist, Album)
 
-🔹 Métadonnées détaillées
-SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE
-FROM INFORMATION_SCHEMA.COLUMNS;
+---
 
+## 👤 Auteur
 
-Objectif :
-Audit structurel de la table.
+**Kodjo Georges AKAKPO**
+Data Analyst | SQL | Power BI | Data Engineering
+🔗 GitHub : [https://github.com/GeorgesProgrammer](https://github.com/GeorgesProgrammer)
 
-🔹 Détection des valeurs manquantes (numériques)
-COUNT(*) - COUNT(colonne)
+---
 
+Si tu veux, je peux maintenant :
 
-Objectif :
-Identifier les colonnes problématiques.
+* t’écrire une **description LinkedIn prête à poster**
+* t’aider à découper ton SQL en fichiers professionnels
+* transformer ce projet en **projet Power BI connecté à SQL Server**
 
-🔹 Valeurs manquantes (catégorielles)
-
-Même logique pour NVARCHAR.
-
-🔹 Détection des doublons
-GROUP BY artist, track, album, ...
-HAVING COUNT(*) > 1
-
-
-Objectif :
-Identifier les lignes dupliquées.
-
-🔹 Contrôle des valeurs incohérentes
-energy < 0 OR energy > 1
-
-
-Objectif :
-Vérifier la cohérence métier.
-
-📊 PARTIE 3 — ANALYSE DES DONNÉES
-Q1️⃣ Tracks > 1 milliard de streams
-
-Filtrage simple avec WHERE.
-
-Q2️⃣ Albums et artistes
-
-DISTINCT pour éviter les doublons.
-
-Q3️⃣ Total des commentaires (licensed)
-
-Agrégation conditionnelle.
-
-Q4️⃣ Tracks de type single
-
-Filtrage par catégorie.
-
-Q5️⃣ Nombre de tracks par artiste
-
-GROUP BY + COUNT.
-
-Q6️⃣ Moyenne de danceability par album
-
-AVG().
-
-Q7️⃣ Top 5 tracks les plus énergiques
-
-Classement avec TOP.
-
-Q8️⃣ Vues et likes pour vidéos officielles
-
-Filtrage + agrégation.
-
-Q9️⃣ Vues totales par album et track
-
-Analyse hiérarchique.
-
-Q🔟 Spotify vs YouTube
-SUM(CASE WHEN ...)
-
-
-Objectif :
-Comparer deux plateformes dans une même requête.
-
-Q1️⃣1️⃣ Top 3 tracks par artiste
-
-Utilisation de DENSE_RANK().
-
-Q1️⃣2️⃣ Liveness > moyenne globale
-
-Sous-requête avec AVG().
-
-Q1️⃣3️⃣ Ratio energy / liveness
-
-Prévention des divisions par zéro.
-
-Q1️⃣4️⃣ Écart d’énergie par album
-
-CTE pour lisibilité.
-
-🏁 CONCLUSION PROFESSIONNELLE
-
-✔ Pipeline ETL clair
-✔ Staging sécurisé
-✔ Qualité des données vérifiée
-✔ SQL analytique avancé
-✔ Projet 100% présentable en portfolio
+Dis-moi 👍
