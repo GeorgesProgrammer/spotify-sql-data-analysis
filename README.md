@@ -1,9 +1,4 @@
-Parfait 👍
-Voici un **README.md complet, clair et professionnel**, exactement au niveau attendu pour un **portfolio Data Analyst / SQL**, rédigé en **français** et aligné avec tout le travail que tu as réalisé.
 
-Tu peux le **copier-coller directement dans GitHub**.
-
----
 
 # 🎵 Spotify – Analyse de données avec SQL Server
 
